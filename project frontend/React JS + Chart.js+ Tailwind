@@ -1,0 +1,55 @@
+// App.jsx
+import React, { useState } from "react";
+import { Line } from "react-chartjs-2";
+import { Button } from "@/components/ui/button";
+
+export default function StockPredictor() {
+  const [ticker, setTicker] = useState("AAPL");
+  const [chartData, setChartData] = useState(null);
+
+  const fetchData = async () => {
+    const response = await fetch(`/api/predict?ticker=${ticker}`);
+    const data = await response.json();
+
+    setChartData({
+      labels: data.dates,
+      datasets: [
+        {
+          label: "Actual Price",
+          data: data.actual,
+          borderColor: "blue",
+          fill: false,
+        },
+        {
+          label: "Predicted Price",
+          data: data.predicted,
+          borderColor: "red",
+          borderDash: [5, 5],
+          fill: false,
+        },
+      ],
+    });
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <h1 className="text-3xl font-bold">AI Stock Price Predictor</h1>
+      <div className="flex gap-4">
+        <input
+          className="border px-4 py-2 rounded w-full"
+          type="text"
+          value={ticker}
+          onChange={(e) => setTicker(e.target.value.toUpperCase())}
+          placeholder="Enter stock ticker (e.g., AAPL)"
+        />
+        <Button onClick={fetchData}>Predict</Button>
+      </div>
+
+      {chartData && (
+        <div className="mt-8">
+          <Line data={chartData} />
+        </div>
+      )}
+    </div>
+  );
+}
